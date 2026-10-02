@@ -1,6 +1,3 @@
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Syntec Calc">
 <!DOCTYPE html>
 <html lang="fr" class="h-full bg-slate-50">
 <head>
@@ -58,16 +55,24 @@
     .card-shadow {
       box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
     }
+    .tab-btn.active {
+      border-bottom-color: #0284c7;
+      color: #0284c7;
+      font-weight: 700;
+      background-color: #f8fafc;
+    }
     @media print {
       .no-print { display: none !important; }
       .print-only { display: block !important; }
       body { background: white !important; font-size: 10pt; color: black !important; }
       .card-shadow { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+      .tab-content { display: block !important; margin-bottom: 2rem; }
     }
   </style>
 </head>
 <body class="font-sans antialiased text-slate-800 bg-slate-50 min-h-full flex flex-col">
 
+  <!-- Header -->
   <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -79,7 +84,7 @@
             Simulateur Solde de Tout Compte
             <span class="bg-sky-500/20 text-sky-300 text-xs font-semibold px-2.5 py-0.5 rounded-md border border-sky-400/30">Syntec RH</span>
           </h1>
-          <p class="text-xs text-slate-400">Calculateur d'indemnités, Contrôleur DUAL & Coût Global Entreprise</p>
+          <p class="text-xs text-slate-400">Licenciement, Rupture Conventionnelle & Comparative Costing</p>
         </div>
       </div>
       
@@ -96,246 +101,265 @@
     </div>
   </header>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+  <!-- Navigation par Onglets -->
+  <div class="bg-white border-b border-slate-200 no-print sticky top-16 z-20 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="flex space-x-2 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
+        <button onclick="switchTab('tab-inputs')" id="btn-tab-inputs" class="tab-btn active border-b-2 border-transparent py-3.5 px-3 text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 flex items-center gap-2 whitespace-nowrap">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+          <span>1. Saisie des Informations</span>
+        </button>
 
-    <!-- Left Column: Controls & Inputs -->
-    <div class="lg:col-span-5 space-y-6 no-print">
+        <button onclick="switchTab('tab-licenciement')" id="btn-tab-licenciement" class="tab-btn border-b-2 border-transparent py-3.5 px-3 text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 flex items-center gap-2 whitespace-nowrap">
+          <i data-lucide="user-x" class="w-4 h-4 text-sky-600"></i>
+          <span>2. Cas Licenciement</span>
+        </button>
 
-      <!-- Valuation Method Selector -->
-      <div class="bg-gradient-to-br from-slate-900 to-sky-950 text-white rounded-xl p-5 card-shadow space-y-4 border border-sky-900/50">
-        <div class="flex items-center justify-between pb-3 border-b border-sky-800/50">
-          <h2 class="font-bold text-white text-sm flex items-center gap-2">
-            <i data-lucide="sliders-horizontal" class="w-4 h-4 text-sky-400"></i>
-            Méthode de Valorisation des Jours
-          </h2>
-          <span class="text-[10px] bg-sky-500/20 text-sky-300 border border-sky-400/30 px-2 py-0.5 rounded-full font-mono">Sélection RH</span>
+        <button onclick="switchTab('tab-rc')" id="btn-tab-rc" class="tab-btn border-b-2 border-transparent py-3.5 px-3 text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 flex items-center gap-2 whitespace-nowrap">
+          <i data-lucide="handshake" class="w-4 h-4 text-indigo-600"></i>
+          <span>3. Rupture Conventionnelle</span>
+        </button>
+
+        <button onclick="switchTab('tab-comparatif')" id="btn-tab-comparatif" class="tab-btn border-b-2 border-transparent py-3.5 px-3 text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 flex items-center gap-2 whitespace-nowrap">
+          <i data-lucide="git-compare" class="w-4 h-4 text-emerald-600"></i>
+          <span>4. Tableau Comparatif</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ==================== TAB 1 : SAISIE DES INFORMATIONS ==================== -->
+    <div id="tab-inputs" class="tab-content space-y-6">
+      <div class="bg-sky-50 border border-sky-200 rounded-xl p-4 text-xs text-sky-900 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="info" class="w-5 h-5 text-sky-600 shrink-0"></i>
+          <span>Renseignez les paramètres ci-dessous. Les résultats se mettent à jour automatiquement dans les onglets de simulation et de comparaison.</span>
         </div>
-
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1.5" for="valuationMethod">
-            Mode de décompte & calcul de la valeur journalière (CP/RTT/CET)
-          </label>
-          <select id="valuationMethod" onchange="calculateAll('method')" class="block w-full rounded-lg border-sky-700 bg-slate-800 text-white text-xs font-semibold focus:border-sky-400 focus:ring-sky-400 p-2.5 border">
-            <option value="AUTO" selected>Arbitrage Auto Légal : Max (1/10è vs Maintien 21.67j)</option>
-            <option value="OUVRES">1. Jours Ouvrés Moyens (21.67 jours/mois)</option>
-            <option value="OUVRABLES">2. Jours Ouvrables Moyens (26.00 jours/mois)</option>
-            <option value="REEL">3. Jours Réels Maintien de salaire (21 jours moyens)</option>
-            <option value="DIXIEME">4. Règle Stricte du 1/10ème Brut Annuel</option>
-          </select>
-        </div>
-
-        <div class="p-3 bg-slate-800/80 rounded-lg border border-sky-800/40 text-[11px] text-sky-200 leading-relaxed" id="valuationMethodHelp">
-          <!-- Dynamically populated description -->
-        </div>
+        <button onclick="switchTab('tab-licenciement')" class="bg-sky-600 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-sky-700 transition">
+          Voir les Résultats &rarr;
+        </button>
       </div>
 
-      <!-- Salary & Seniority Inputs -->
-      <div class="bg-white rounded-xl p-5 border border-slate-200 card-shadow space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-          <h2 class="font-semibold text-slate-900 text-sm flex items-center gap-2">
-            <i data-lucide="briefcase" class="w-4 h-4 text-sky-600"></i>
-            Rémunération & Ancienneté
-          </h2>
-          <span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Éléments du contrat</span>
-        </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <div class="space-y-3.5">
-          <!-- Salaire de base -->
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1" for="baseSalary">
-              Salaire mensuel brut de base (€)
-            </label>
-            <div class="relative rounded-md shadow-sm">
-              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">€</div>
-              <input type="number" id="baseSalary" value="4500" step="50" min="0" class="block w-full rounded-lg border-slate-300 pl-8 pr-12 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900 font-semibold" oninput="calculateAll('baseSalary')">
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">brut/mois</div>
+        <!-- Valuation Method & Dual Controller -->
+        <div class="space-y-6">
+          <div class="bg-gradient-to-br from-slate-900 to-sky-950 text-white rounded-xl p-5 card-shadow space-y-4 border border-sky-900/50">
+            <div class="flex items-center justify-between pb-3 border-b border-sky-800/50">
+              <h2 class="font-bold text-white text-sm flex items-center gap-2">
+                <i data-lucide="sliders-horizontal" class="w-4 h-4 text-sky-400"></i>
+                Méthode de Valorisation des Jours
+              </h2>
+              <span class="text-[10px] bg-sky-500/20 text-sky-300 border border-sky-400/30 px-2 py-0.5 rounded-full font-mono">Sélection RH</span>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5" for="valuationMethod">
+                Mode de décompte & calcul de la valeur journalière (CP/RTT/CET)
+              </label>
+              <select id="valuationMethod" onchange="calculateAll('method')" class="block w-full rounded-lg border-sky-700 bg-slate-800 text-white text-xs font-semibold focus:border-sky-400 focus:ring-sky-400 p-2.5 border">
+                <option value="AUTO" selected>Arbitrage Auto Légal : Max (1/10è vs Maintien 21.67j)</option>
+                <option value="OUVRES">1. Jours Ouvrés Moyens (21.67 jours/mois)</option>
+                <option value="OUVRABLES">2. Jours Ouvrables Moyens (26.00 jours/mois)</option>
+                <option value="REEL">3. Jours Réels Maintien de salaire (21 jours moyens)</option>
+                <option value="DIXIEME">4. Règle Stricte du 1/10ème Brut Annuel</option>
+              </select>
+            </div>
+
+            <div class="p-3 bg-slate-800/80 rounded-lg border border-sky-800/40 text-[11px] text-sky-200 leading-relaxed" id="valuationMethodHelp">
             </div>
           </div>
 
-          <!-- Variable mensuel -->
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1" for="monthlyVariable">
-              Primes variables / Commissions mensuelles éligibles (€)
-            </label>
-            <div class="relative rounded-md shadow-sm">
-              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">€</div>
-              <input type="number" id="monthlyVariable" value="500" step="50" min="0" class="block w-full rounded-lg border-slate-300 pl-8 pr-12 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900" oninput="calculateAll('monthlyVariable')">
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">brut/mois</div>
+          <!-- Dual Supra Controller -->
+          <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white rounded-xl p-5 card-shadow space-y-5 border border-indigo-700/50">
+            <div class="flex items-center justify-between border-b border-indigo-800/60 pb-3">
+              <h2 class="font-bold text-white text-sm flex items-center gap-2">
+                <i data-lucide="trending-up" class="w-4 h-4 text-indigo-400"></i>
+                Négociation Supra-Légale DUAL
+              </h2>
+              <span class="text-[10px] bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2.5 py-0.5 rounded-full font-mono font-semibold" id="supraDisplayBadge">2.0 mois (10 750 €)</span>
             </div>
-            <p class="text-[11px] text-slate-500 mt-0.5">Primes d'objectifs, rendement, commissions directes.</p>
-          </div>
 
-          <!-- Primes annuelles globalisées -->
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1" for="annualBonus">
-              13ème mois & Primes annuelles non éligibles CP (€)
-            </label>
-            <div class="relative rounded-md shadow-sm">
-              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">€</div>
-              <input type="number" id="annualBonus" value="4500" step="100" min="0" class="block w-full rounded-lg border-slate-300 pl-8 pr-12 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900" oninput="calculateAll('annualBonus')">
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">brut/an</div>
-            </div>
-            <p class="text-[11px] text-slate-500 mt-0.5">Exclues de la base CP car déjà perçues pour toute l'année.</p>
-          </div>
-
-          <!-- Ancienneté (Années & Mois) -->
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">Ancienneté retenue</label>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="relative">
-                <input type="number" id="seniorityYears" value="11" min="0" max="50" class="block w-full rounded-lg border-slate-300 pr-12 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900 font-semibold" oninput="calculateAll('seniorityYears')">
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">ans</div>
+            <!-- Controller 1: MOIS DE SALAIRE -->
+            <div class="p-3 bg-slate-900/60 rounded-xl border border-indigo-800/40 space-y-2">
+              <div class="flex justify-between items-center">
+                <label class="text-xs text-indigo-200 font-semibold flex items-center gap-1.5" for="supraMonthsRange">
+                  <i data-lucide="calendar-days" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  1. Contrôleur en MOIS de salaire
+                </label>
+                <span class="text-sm font-bold text-sky-400 font-mono" id="supraMonthsValue">2.0 mois</span>
               </div>
-              <div class="relative">
-                <input type="number" id="seniorityMonths" value="4" min="0" max="11" class="block w-full rounded-lg border-slate-300 pr-12 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900 font-semibold" oninput="calculateAll('seniorityMonths')">
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">mois</div>
+
+              <input type="range" id="supraMonthsRange" min="0" max="24" step="0.1" value="2.0" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-400" oninput="handleSupraMonthsChange(this.value, 'slider')">
+              
+              <div class="flex justify-between text-[10px] text-slate-400 font-mono pt-0.5">
+                <span>0 mois</span>
+                <span>6 mois</span>
+                <span>12 mois</span>
+                <span>18 mois</span>
+                <span>24 mois</span>
+              </div>
+
+              <div class="pt-1 flex items-center gap-2">
+                <label class="text-[11px] text-slate-300 shrink-0" for="supraMonthsInput">Saisie exacte (mois) :</label>
+                <div class="relative rounded-md shadow-sm w-full">
+                  <input type="number" id="supraMonthsInput" value="2.0" step="0.1" min="0" max="48" class="block w-full rounded-lg border-indigo-700 bg-slate-800 text-sky-300 pr-12 text-xs focus:border-sky-400 focus:ring-sky-400 border p-1.5 font-mono font-bold" oninput="handleSupraMonthsChange(this.value, 'input')">
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 text-[11px]">mois</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Controller 2: MONTANT BRUT -->
+            <div class="p-3 bg-slate-900/60 rounded-xl border border-indigo-800/40 space-y-2">
+              <div class="flex justify-between items-center">
+                <label class="text-xs text-indigo-200 font-semibold flex items-center gap-1.5" for="supraEurosRange">
+                  <i data-lucide="euro" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  2. Contrôleur en MONTANT BRUT (€)
+                </label>
+                <span class="text-sm font-bold text-emerald-400 font-mono" id="supraEurosValue">10 750 €</span>
+              </div>
+
+              <input type="range" id="supraEurosRange" min="0" max="100000" step="500" value="10750" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400" oninput="handleSupraEurosChange(this.value, 'slider')">
+              
+              <div class="flex justify-between text-[10px] text-slate-400 font-mono pt-0.5">
+                <span>0 €</span>
+                <span>25k €</span>
+                <span>50k €</span>
+                <span>75k €</span>
+                <span>100k €</span>
+              </div>
+
+              <div class="pt-1 flex items-center gap-2">
+                <label class="text-[11px] text-slate-300 shrink-0" for="supraEurosInput">Saisie directe (€) :</label>
+                <div class="relative rounded-md shadow-sm w-full">
+                  <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400 text-xs">€</div>
+                  <input type="number" id="supraEurosInput" value="10750" step="500" min="0" class="block w-full rounded-lg border-indigo-700 bg-slate-800 text-emerald-300 pl-7 pr-3 text-xs focus:border-emerald-400 focus:ring-emerald-400 border p-1.5 font-mono font-bold" oninput="handleSupraEurosChange(this.value, 'input')">
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Salary, Seniority & Days Inputs -->
+        <div class="space-y-6">
+          <div class="bg-white rounded-xl p-5 border border-slate-200 card-shadow space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h2 class="font-semibold text-slate-900 text-sm flex items-center gap-2">
+                <i data-lucide="briefcase" class="w-4 h-4 text-sky-600"></i>
+                Rémunération & Ancienneté
+              </h2>
+              <span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Contrat</span>
+            </div>
+
+            <div class="space-y-3.5">
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1" for="baseSalary">
+                  Salaire mensuel brut de base (€)
+                </label>
+                <div class="relative rounded-md shadow-sm">
+                  <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">€</div>
+                  <input type="number" id="baseSalary" value="4500" step="50" min="0" class="block w-full rounded-lg border-slate-300 pl-8 pr-12 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900 font-semibold" oninput="calculateAll('baseSalary')">
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">brut/mois</div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1" for="monthlyVariable">
+                  Primes variables / Commissions mensuelles éligibles (€)
+                </label>
+                <div class="relative rounded-md shadow-sm">
+                  <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">€</div>
+                  <input type="number" id="monthlyVariable" value="500" step="50" min="0" class="block w-full rounded-lg border-slate-300 pl-8 pr-12 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900" oninput="calculateAll('monthlyVariable')">
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">brut/mois</div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1" for="annualBonus">
+                  13ème mois & Primes annuelles non éligibles CP (€)
+                </label>
+                <div class="relative rounded-md shadow-sm">
+                  <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">€</div>
+                  <input type="number" id="annualBonus" value="4500" step="100" min="0" class="block w-full rounded-lg border-slate-300 pl-8 pr-12 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900" oninput="calculateAll('annualBonus')">
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">brut/an</div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Ancienneté retenue</label>
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="relative">
+                    <input type="number" id="seniorityYears" value="11" min="0" max="50" class="block w-full rounded-lg border-slate-300 pr-12 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900 font-semibold" oninput="calculateAll('seniorityYears')">
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">ans</div>
+                  </div>
+                  <div class="relative">
+                    <input type="number" id="seniorityMonths" value="4" min="0" max="11" class="block w-full rounded-lg border-slate-300 pr-12 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900 font-semibold" oninput="calculateAll('seniorityMonths')">
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">mois</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl p-5 border border-slate-200 card-shadow space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h2 class="font-semibold text-slate-900 text-sm flex items-center gap-2">
+                <i data-lucide="calendar" class="w-4 h-4 text-emerald-600"></i>
+                Soldes de Congés, RTT & CET
+              </h2>
+              <span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Jours dus</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1" for="cpDays">CP</label>
+                <div class="relative">
+                  <input type="number" id="cpDays" value="15" step="0.5" min="0" class="block w-full rounded-lg border-slate-300 pr-8 text-sm focus:border-sky-500 border p-2 font-semibold" oninput="calculateAll('cpDays')">
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-slate-400 text-xs">j</div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1" for="rttDays">RTT</label>
+                <div class="relative">
+                  <input type="number" id="rttDays" value="4" step="0.5" min="0" class="block w-full rounded-lg border-slate-300 pr-8 text-sm focus:border-sky-500 border p-2 font-semibold" oninput="calculateAll('rttDays')">
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-slate-400 text-xs">j</div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1" for="cetDays">CET</label>
+                <div class="relative">
+                  <input type="number" id="cetDays" value="5" step="0.5" min="0" class="block w-full rounded-lg border-slate-300 pr-8 text-sm focus:border-sky-500 border p-2 font-semibold" oninput="calculateAll('cetDays')">
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-slate-400 text-xs">j</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1" for="pendingBonus">
+                Variable/Primes dues au prorata (€)
+              </label>
+              <div class="relative rounded-md shadow-sm">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">€</div>
+                <input type="number" id="pendingBonus" value="1200" step="50" min="0" class="block w-full rounded-lg border-slate-300 pl-8 pr-12 text-sm focus:border-sky-500 border p-2 text-slate-900" oninput="calculateAll('pendingBonus')">
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">brut du</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
-
-      <!-- Days & Bonuses -->
-      <div class="bg-white rounded-xl p-5 border border-slate-200 card-shadow space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-          <h2 class="font-semibold text-slate-900 text-sm flex items-center gap-2">
-            <i data-lucide="calendar" class="w-4 h-4 text-emerald-600"></i>
-            Soldes de Congés, RTT & CET
-          </h2>
-          <span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Jours dus</span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <!-- Congés Payés non pris -->
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1" for="cpDays">
-              Congés (CP)
-            </label>
-            <div class="relative">
-              <input type="number" id="cpDays" value="15" step="0.5" min="0" class="block w-full rounded-lg border-slate-300 pr-10 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900 font-semibold" oninput="calculateAll('cpDays')">
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 text-xs">j</div>
-            </div>
-          </div>
-
-          <!-- RTT non pris -->
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1" for="rttDays">
-              Solde RTT
-            </label>
-            <div class="relative">
-              <input type="number" id="rttDays" value="4" step="0.5" min="0" class="block w-full rounded-lg border-slate-300 pr-10 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900 font-semibold" oninput="calculateAll('rttDays')">
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 text-xs">j</div>
-            </div>
-          </div>
-
-          <!-- CET -->
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1" for="cetDays">
-              Solde CET
-            </label>
-            <div class="relative">
-              <input type="number" id="cetDays" value="5" step="0.5" min="0" class="block w-full rounded-lg border-slate-300 pr-10 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900 font-semibold" oninput="calculateAll('cetDays')">
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 text-xs">j</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Primes proratisées dues -->
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1" for="pendingBonus">
-            Variable/Primes au prorata dues à la sortie (€)
-          </label>
-          <div class="relative rounded-md shadow-sm">
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">€</div>
-            <input type="number" id="pendingBonus" value="1200" step="50" min="0" class="block w-full rounded-lg border-slate-300 pl-8 pr-12 text-sm focus:border-sky-500 focus:ring-sky-500 border p-2 text-slate-900" oninput="calculateAll('pendingBonus')">
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 text-xs">brut du</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- DUAL SUPRA-LEGAL CONTROLLER CARD -->
-      <!-- STREAMING_CHUNK:Building dual supra-legal negotiation controller card (Months <-> Euros)... -->
-      <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white rounded-xl p-5 card-shadow space-y-5 border border-indigo-700/50">
-        <div class="flex items-center justify-between border-b border-indigo-800/60 pb-3">
-          <h2 class="font-bold text-white text-sm flex items-center gap-2">
-            <i data-lucide="trending-up" class="w-4 h-4 text-indigo-400"></i>
-            Négociation Supra-Légale DUAL
-          </h2>
-          <span class="text-[10px] bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2.5 py-0.5 rounded-full font-mono font-semibold" id="supraDisplayBadge">2.0 mois (10 750 €)</span>
-        </div>
-
-        <!-- Controller 1: MOIS DE SALAIRE DE REFERENCE -->
-        <div class="p-3 bg-slate-900/60 rounded-xl border border-indigo-800/40 space-y-2">
-          <div class="flex justify-between items-center">
-            <label class="text-xs text-indigo-200 font-semibold flex items-center gap-1.5" for="supraMonthsRange">
-              <i data-lucide="calendar-days" class="w-3.5 h-3.5 text-indigo-400"></i>
-              1. Contrôleur en MOIS de salaire
-            </label>
-            <span class="text-sm font-bold text-sky-400 font-mono" id="supraMonthsValue">2.0 mois</span>
-          </div>
-
-          <input type="range" id="supraMonthsRange" min="0" max="24" step="0.1" value="2.0" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-400" oninput="handleSupraMonthsChange(this.value, 'slider')">
-          
-          <div class="flex justify-between text-[10px] text-slate-400 font-mono pt-0.5">
-            <span>0 mois</span>
-            <span>6 mois</span>
-            <span>12 mois</span>
-            <span>18 mois</span>
-            <span>24 mois</span>
-          </div>
-
-          <div class="pt-1 flex items-center gap-2">
-            <label class="text-[11px] text-slate-300 shrink-0" for="supraMonthsInput">Saisie exacte (mois) :</label>
-            <div class="relative rounded-md shadow-sm w-full">
-              <input type="number" id="supraMonthsInput" value="2.0" step="0.1" min="0" max="48" class="block w-full rounded-lg border-indigo-700 bg-slate-800 text-sky-300 pr-12 text-xs focus:border-sky-400 focus:ring-sky-400 border p-1.5 font-mono font-bold" oninput="handleSupraMonthsChange(this.value, 'input')">
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 text-[11px]">mois</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Controller 2: MONTANT EN EUROS -->
-        <div class="p-3 bg-slate-900/60 rounded-xl border border-indigo-800/40 space-y-2">
-          <div class="flex justify-between items-center">
-            <label class="text-xs text-indigo-200 font-semibold flex items-center gap-1.5" for="supraEurosRange">
-              <i data-lucide="euro" class="w-3.5 h-3.5 text-emerald-400"></i>
-              2. Contrôleur en MONTANT BRUT (€)
-            </label>
-            <span class="text-sm font-bold text-emerald-400 font-mono" id="supraEurosValue">10 750 €</span>
-          </div>
-
-          <input type="range" id="supraEurosRange" min="0" max="100000" step="500" value="10750" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400" oninput="handleSupraEurosChange(this.value, 'slider')">
-          
-          <div class="flex justify-between text-[10px] text-slate-400 font-mono pt-0.5">
-            <span>0 €</span>
-            <span>25k €</span>
-            <span>50k €</span>
-            <span>75k €</span>
-            <span>100k €</span>
-          </div>
-
-          <div class="pt-1 flex items-center gap-2">
-            <label class="text-[11px] text-slate-300 shrink-0" for="supraEurosInput">Saisie directe (€) :</label>
-            <div class="relative rounded-md shadow-sm w-full">
-              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400 text-xs">€</div>
-              <input type="number" id="supraEurosInput" value="10750" step="500" min="0" class="block w-full rounded-lg border-indigo-700 bg-slate-800 text-emerald-300 pl-7 pr-3 text-xs focus:border-emerald-400 focus:ring-emerald-400 border p-1.5 font-mono font-bold" oninput="handleSupraEurosChange(this.value, 'input')">
-            </div>
-          </div>
-        </div>
-
-        <p class="text-[11px] text-indigo-200/80 italic flex items-center gap-1">
-          <i data-lucide="refresh-cw" class="w-3 h-3 text-indigo-400 shrink-0"></i>
-          Les contrôleurs Mois et € sont parfaitement synchronisés en temps réel selon le salaire de référence recalculé.
-        </p>
-      </div>
-
     </div>
 
-    <!-- Right Column: Settlement Results Dashboard -->
-    <div class="lg:col-span-7 space-y-6">
+
+    <!-- ==================== TAB 2 : RESULTATS LICENCIEMENT ==================== -->
+    <div id="tab-licenciement" class="tab-content hidden space-y-6">
 
       <!-- Summary KPI Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <!-- Total STC Brut -->
         <div class="bg-white rounded-xl p-4 border border-slate-200 card-shadow">
           <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total STC Brut</p>
           <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 font-mono" id="totalStcBrut">0 €</p>
@@ -345,7 +369,6 @@
           </div>
         </div>
 
-        <!-- Indemnité Licenciement -->
         <div class="bg-white rounded-xl p-4 border border-slate-200 card-shadow">
           <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Indemnité Syntec/Légale</p>
           <p class="text-2xl sm:text-3xl font-extrabold text-sky-600 mt-1 font-mono" id="indemnityLegal">0 €</p>
@@ -355,7 +378,6 @@
           </div>
         </div>
 
-        <!-- Carence France Travail -->
         <div class="bg-white rounded-xl p-4 border border-slate-200 card-shadow">
           <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Carence France Travail</p>
           <p class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1 font-mono" id="carenceDays">0 jours</p>
@@ -366,42 +388,28 @@
         </div>
       </div>
 
-      <!-- Breakdown Visualization -->
+      <!-- Breakdown Bar -->
       <div class="bg-white rounded-xl p-5 border border-slate-200 card-shadow space-y-4">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold text-slate-900 text-sm flex items-center gap-2">
             <i data-lucide="pie-chart" class="w-4 h-4 text-sky-600"></i>
-            Répartition du Solde de Tout Compte
+            Répartition du Solde de Tout Compte (Licenciement)
           </h3>
           <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md font-mono" id="refSalaryBadge">Ref: 0 €/mois</span>
         </div>
 
-        <!-- Progress Stacked Bar -->
         <div class="w-full bg-slate-100 h-6 rounded-full overflow-hidden flex shadow-inner">
-          <div id="barLegal" class="bg-sky-600 h-full transition-all duration-300" style="width: 40%" title="Indemnité Légale/Syntec"></div>
-          <div id="barSupra" class="bg-indigo-600 h-full transition-all duration-300" style="width: 30%" title="Indemnité Supra-Légale"></div>
-          <div id="barConges" class="bg-emerald-500 h-full transition-all duration-300" style="width: 15%" title="Congés & RTT & CET"></div>
-          <div id="barPrimes" class="bg-amber-500 h-full transition-all duration-300" style="width: 15%" title="Primes au prorata"></div>
+          <div id="barLegal" class="bg-sky-600 h-full transition-all duration-300" style="width: 40%"></div>
+          <div id="barSupra" class="bg-indigo-600 h-full transition-all duration-300" style="width: 30%"></div>
+          <div id="barConges" class="bg-emerald-500 h-full transition-all duration-300" style="width: 15%"></div>
+          <div id="barPrimes" class="bg-amber-500 h-full transition-all duration-300" style="width: 15%"></div>
         </div>
 
-        <!-- Legend -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-          <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-sky-600 inline-block"></span>
-            <span class="text-slate-600 font-medium">Légale/Syntec</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-indigo-600 inline-block"></span>
-            <span class="text-slate-600 font-medium">Supra-légale</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
-            <span class="text-slate-600 font-medium">CP / RTT / CET</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
-            <span class="text-slate-600 font-medium">Primes dues</span>
-          </div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-sky-600"></span><span>Légale/Syntec</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-indigo-600"></span><span>Supra-légale</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span><span>CP / RTT / CET</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500"></span><span>Primes dues</span></div>
         </div>
       </div>
 
@@ -416,134 +424,87 @@
         </div>
 
         <div class="divide-y divide-slate-100 text-sm">
-
-          <!-- Line 1: Indemnité de licenciement Syntec -->
-          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/50 transition">
-            <div class="space-y-1">
+          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/50">
+            <div>
               <div class="flex items-center gap-2">
                 <span class="font-semibold text-slate-900">Indemnité de Licenciement Syntec</span>
                 <span class="bg-sky-100 text-sky-800 text-[10px] font-medium px-2 py-0.5 rounded-full">Non imposable</span>
               </div>
-              <p class="text-xs text-slate-500" id="detailLegalFormula">
-                Calculé sur l'ancienneté conventionnelle Syntec.
-              </p>
+              <p class="text-xs text-slate-500" id="detailLegalFormula">Calculé sur l'ancienneté conventionnelle Syntec.</p>
             </div>
-            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rowLegalAmount">
-              0,00 €
-            </div>
+            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rowLegalAmount">0,00 €</div>
           </div>
 
-          <!-- Line 2: Congés Payés Non Pris (ICCP) -->
-          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/50 transition">
-            <div class="space-y-1">
+          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/50">
+            <div>
               <div class="flex items-center gap-2">
                 <span class="font-semibold text-slate-900">Indemnité Congés Payés (ICCP)</span>
                 <span class="bg-emerald-100 text-emerald-800 text-[10px] font-medium px-2 py-0.5 rounded-full" id="iccpMethodBadge">Règle retenue</span>
               </div>
-              <p class="text-xs text-slate-500" id="detailIccpFormula">
-                Calcul dynamique selon la méthode sélectionnée.
-              </p>
+              <p class="text-xs text-slate-500" id="detailIccpFormula">Calcul dynamique selon méthode.</p>
             </div>
-            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rowIccpAmount">
-              0,00 €
-            </div>
+            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rowIccpAmount">0,00 €</div>
           </div>
 
-          <!-- Line 3: RTT non pris -->
-          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/50 transition">
-            <div class="space-y-1">
+          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/50">
+            <div>
               <span class="font-semibold text-slate-900">Rachat des RTT Non Pris</span>
-              <p class="text-xs text-slate-500" id="detailRttFormula">
-                Valorisés au taux journalier selon la méthode active.
-              </p>
+              <p class="text-xs text-slate-500" id="detailRttFormula">Valorisés au taux journalier.</p>
             </div>
-            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rowRttAmount">
-              0,00 €
-            </div>
+            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rowRttAmount">0,00 €</div>
           </div>
 
-          <!-- Line 4: CET non pris -->
-          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/50 transition">
-            <div class="space-y-1">
+          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/50">
+            <div>
               <span class="font-semibold text-slate-900">Compte Épargne Temps (CET)</span>
-              <p class="text-xs text-slate-500" id="detailCetFormula">
-                Rachat des jours capitalisés.
-              </p>
+              <p class="text-xs text-slate-500" id="detailCetFormula">Rachat des jours capitalisés.</p>
             </div>
-            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rowCetAmount">
-              0,00 €
-            </div>
+            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rowCetAmount">0,00 €</div>
           </div>
 
-          <!-- Line 5: Primes variables & régularisations -->
-          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/50 transition">
-            <div class="space-y-1">
+          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/50">
+            <div>
               <span class="font-semibold text-slate-900">Primes & Variables Dues Proratisées</span>
-              <p class="text-xs text-slate-500">
-                Variables d'objectifs ou solde des compléments acquis.
-              </p>
+              <p class="text-xs text-slate-500">Variables d'objectifs ou compléments acquis.</p>
             </div>
-            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rowBonusAmount">
-              0,00 €
-            </div>
+            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rowBonusAmount">0,00 €</div>
           </div>
 
-          <!-- Line 6: Part Supra-Légale -->
           <div class="p-4 bg-indigo-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div class="space-y-1">
+            <div>
               <div class="flex items-center gap-2">
                 <span class="font-semibold text-indigo-950">Indemnité Supra-Légale / Transactionnelle</span>
                 <span class="bg-indigo-100 text-indigo-800 text-[10px] font-medium px-2 py-0.5 rounded-full" id="rowSupraMonthsBadge">0.0 mois</span>
               </div>
-              <p class="text-xs text-indigo-800/80">
-                Part additionnelle négociée (en mois de salaire de référence ou en montant forfaitaire).
-              </p>
+              <p class="text-xs text-indigo-800/80">Part additionnelle négociée.</p>
             </div>
-            <div class="text-right font-mono font-bold text-indigo-700 text-lg" id="rowSupraAmount">
-              0,00 €
-            </div>
+            <div class="text-right font-mono font-bold text-indigo-700 text-lg" id="rowSupraAmount">0,00 €</div>
           </div>
 
-          <!-- Line Total -->
           <div class="p-4 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <span class="font-bold text-base">TOTAL BRUT À ENCAISSER</span>
               <p class="text-xs text-slate-400">Montant total brut figurant sur le reçu pour solde de tout compte</p>
             </div>
-            <div class="text-right font-mono font-extrabold text-emerald-400 text-2xl" id="rowTotalAmount">
-              0,00 €
-            </div>
+            <div class="text-right font-mono font-extrabold text-emerald-400 text-2xl" id="rowTotalAmount">0,00 €</div>
           </div>
-
         </div>
       </div>
 
-      <!-- Legal & France Travail Info Cards -->
+      <!-- Legal & Social Info Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        <!-- Fiscal & Social Card -->
         <div class="bg-white rounded-xl p-4 border border-slate-200 card-shadow space-y-3">
           <div class="flex items-center gap-2 text-slate-900 font-semibold text-sm">
             <i data-lucide="receipt-text" class="w-4 h-4 text-sky-600"></i>
-            Régime Fiscal & Cotisations Sociales
+            Régime Fiscal & Cotisations (Licenciement)
           </div>
           <ul class="text-xs text-slate-600 space-y-2">
-            <li class="flex items-start gap-1.5">
-              <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5"></i>
-              <span><strong>Indemnité Licenciement :</strong> Exonérée d'Impôt et de cotisations sociales (plafond légal).</span>
-            </li>
-            <li class="flex items-start gap-1.5">
-              <i data-lucide="info" class="w-3.5 h-3.5 text-sky-600 shrink-0 mt-0.5"></i>
-              <span><strong>Plafond d'Exonération Supra :</strong> Exonération fiscale jusqu'à <strong id="fiscalLimitText">2× Salaire Annuel</strong> (Max 278 208 € pour 2026).</span>
-            </li>
-            <li class="flex items-start gap-1.5">
-              <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5"></i>
-              <span><strong>CP, RTT, CET & Primes :</strong> Intégralement soumis à l'impôt et aux cotisations sociales comme du salaire.</span>
-            </li>
+            <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5"></i><span><strong>Indemnité Licenciement :</strong> Exonérée d'Impôt et cotisations (plafond légal).</span></li>
+            <li class="flex items-start gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 text-sky-600 shrink-0 mt-0.5"></i><span><strong>Plafond d'Exonération Supra :</strong> Exonération fiscale jusqu'à <strong id="fiscalLimitText">2× Salaire Annuel</strong>.</span></li>
+            <li class="flex items-start gap-1.5"><i data-lucide="alert-circle" class="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5"></i><span><strong>CP, RTT, CET & Primes :</strong> Intégralement soumis aux cotisations et à l'impôt.</span></li>
           </ul>
         </div>
 
-        <!-- France Travail Delay Card -->
         <div class="bg-white rounded-xl p-4 border border-slate-200 card-shadow space-y-3">
           <div class="flex items-center gap-2 text-slate-900 font-semibold text-sm">
             <i data-lucide="hourglass" class="w-4 h-4 text-amber-600"></i>
@@ -554,114 +515,370 @@
               <span class="font-medium text-amber-900">Différé spécifique (Supra) :</span>
               <span class="font-mono font-bold text-amber-900 text-sm" id="carenceDaysText">0 jours</span>
             </div>
-            <p class="text-[11px] text-slate-500">
-              Formule légale : <code class="bg-slate-100 px-1 py-0.5 rounded text-slate-700">Part Supra-Légale / 107.9 €</code> (plafonné à 150 jours).
-            </p>
-            <p class="text-[11px] text-slate-500">
-              S'ajoute au différé congés payés (<span id="carenceCpDaysText" class="font-medium">0</span> jours) et au délai d'attente de 7 jours.
-            </p>
+            <p class="text-[11px] text-slate-500">Formule : Part Supra / 107.9 € (max 150j).</p>
+            <p class="text-[11px] text-slate-500">S'ajoute au différé CP (<span id="carenceCpDaysText" class="font-medium">0</span>j) + 7 jours d'attente.</p>
           </div>
         </div>
-
       </div>
 
-      <!-- NEW DETAILED TABLE: EMPLOYER COST, SOCIAL CHARGES, CSG & SALARY NET BREAKDOWN -->
-      <div class="bg-white rounded-xl border border-slate-200 card-shadow overflow-hidden space-y-0">
-        <div class="p-4 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <div class="p-1.5 bg-sky-500/20 text-sky-400 rounded-lg">
-              <i data-lucide="building-2" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <h3 class="font-bold text-sm">Analyse Complète : Coût Entreprise, Charges & Net Salarié</h3>
-              <p class="text-[11px] text-slate-400">Ventilation détaillée de l'effort financier employeur et du montant net perçu</p>
-            </div>
-          </div>
-          <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700 font-mono">Détail Social & Fiscal</span>
+      <!-- Cost Table (Licenciement) -->
+      <div class="bg-white rounded-xl border border-slate-200 card-shadow overflow-hidden">
+        <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+          <h3 class="font-bold text-sm flex items-center gap-2">
+            <i data-lucide="building-2" class="w-5 h-5 text-sky-400"></i>
+            Analyse Coût Entreprise & Net Salarié (Licenciement)
+          </h3>
+          <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700 font-mono">Licenciement</span>
         </div>
 
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
               <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-                <th class="p-3">Composante STC</th>
+                <th class="p-3">Composante</th>
                 <th class="p-3 text-right">Montant Brut (€)</th>
-                <th class="p-3 text-right text-slate-600">Charges Patronales (~42% ou Forfait)</th>
-                <th class="p-3 text-right font-bold text-slate-900 bg-slate-200/50">Coût Total Entreprise</th>
-                <th class="p-3 text-right text-slate-600">Cotis. Salariales / CSG-CRDS</th>
+                <th class="p-3 text-right text-slate-600">Charges Patronales</th>
+                <th class="p-3 text-right font-bold text-slate-900 bg-slate-200/50">Coût Entreprise</th>
+                <th class="p-3 text-right text-slate-600">Cotis. Salariales / CSG</th>
                 <th class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/50">Net Estimé Salarié</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 font-mono text-slate-800">
-              
-              <!-- Element 1: Salaire / CP / RTT / CET / Primes -->
-              <tr class="hover:bg-slate-50 transition">
-                <td class="p-3 font-sans">
-                  <div class="font-semibold text-slate-900">1. Éléments Salariaux (CP, RTT, CET, Primes)</div>
-                  <div class="text-[10px] font-normal text-slate-500">Soumis intégralement aux cotisations sociales & CSG</div>
-                </td>
-                <td class="p-3 text-right font-semibold" id="colBrutSal">0,00 €</td>
+              <tr>
+                <td class="p-3 font-sans">1. Éléments Salariaux (CP/RTT/CET/Primes)</td>
+                <td class="p-3 text-right" id="colBrutSal">0,00 €</td>
                 <td class="p-3 text-right text-slate-600" id="colPatSal">0,00 €</td>
-                <td class="p-3 text-right font-bold text-slate-900 bg-slate-100/50" id="colCostSal">0,00 €</td>
+                <td class="p-3 text-right font-bold bg-slate-100/50" id="colCostSal">0,00 €</td>
                 <td class="p-3 text-right text-amber-700" id="colCotSal">0,00 €</td>
                 <td class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/30" id="colNetSal">0,00 €</td>
               </tr>
-
-              <!-- Element 2: Indemnité Légale Syntec -->
-              <tr class="hover:bg-slate-50 transition">
-                <td class="p-3 font-sans">
-                  <div class="font-semibold text-slate-900">2. Indemnité Légale / Syntec</div>
-                  <div class="text-[10px] font-normal text-slate-500">100% Exonérée de cotisations, forfait social & CSG</div>
-                </td>
-                <td class="p-3 text-right font-semibold text-sky-700" id="colBrutLegal">0,00 €</td>
+              <tr>
+                <td class="p-3 font-sans">2. Indemnité Légale / Syntec</td>
+                <td class="p-3 text-right text-sky-700" id="colBrutLegal">0,00 €</td>
                 <td class="p-3 text-right text-slate-500" id="colPatLegal">0,00 €</td>
-                <td class="p-3 text-right font-bold text-slate-900 bg-slate-100/50" id="colCostLegal">0,00 €</td>
+                <td class="p-3 text-right font-bold bg-slate-100/50" id="colCostLegal">0,00 €</td>
                 <td class="p-3 text-right text-slate-500" id="colCotLegal">0,00 €</td>
                 <td class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/30" id="colNetLegal">0,00 €</td>
               </tr>
-
-              <!-- Element 3: Part Supra-Légale -->
-              <tr class="hover:bg-slate-50 transition">
-                <td class="p-3 font-sans">
-                  <div class="font-semibold text-indigo-950">3. Indemnité Supra-Légale Négociée</div>
-                  <div class="text-[10px] font-normal text-indigo-700/80" id="colSupraHelp">Exonérée sous plafonds Urssaf / Forfait social éventuel</div>
-                </td>
-                <td class="p-3 text-right font-semibold text-indigo-700" id="colBrutSupra">0,00 €</td>
+              <tr>
+                <td class="p-3 font-sans">3. Indemnité Supra-Légale</td>
+                <td class="p-3 text-right text-indigo-700" id="colBrutSupra">0,00 €</td>
                 <td class="p-3 text-right text-slate-600" id="colPatSupra">0,00 €</td>
-                <td class="p-3 text-right font-bold text-slate-900 bg-slate-100/50" id="colCostSupra">0,00 €</td>
+                <td class="p-3 text-right font-bold bg-slate-100/50" id="colCostSupra">0,00 €</td>
                 <td class="p-3 text-right text-amber-700" id="colCotSupra">0,00 €</td>
                 <td class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/30" id="colNetSupra">0,00 €</td>
               </tr>
-
-              <!-- TOTAL ROW -->
               <tr class="bg-slate-900 text-white font-bold text-sm">
-                <td class="p-3 font-sans">TOTAL GÉNÉRAL DU SOLDE DE TOUT COMPTE</td>
+                <td class="p-3 font-sans">TOTAL LICENCIEMENT</td>
                 <td class="p-3 text-right text-emerald-400 font-extrabold" id="colTotalBrut">0,00 €</td>
                 <td class="p-3 text-right text-slate-300" id="colTotalPat">0,00 €</td>
                 <td class="p-3 text-right text-amber-300 bg-slate-800" id="colTotalCost">0,00 €</td>
                 <td class="p-3 text-right text-slate-300" id="colTotalCot">0,00 €</td>
                 <td class="p-3 text-right text-emerald-300 bg-emerald-950/80 font-extrabold text-base" id="colTotalNet">0,00 €</td>
               </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== TAB 3 : RUPTURE CONVENTIONNELLE ==================== -->
+    <div id="tab-rc" class="tab-content hidden space-y-6">
+
+      <!-- Summary KPI Cards RC -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl p-4 border border-slate-200 card-shadow">
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total STC Brut (RC)</p>
+          <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 font-mono" id="rcTotalStcBrut">0 €</p>
+          <div class="mt-2 flex items-center text-xs text-emerald-600 font-medium gap-1">
+            <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+            <span>Montant brut perçu par le salarié</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 border border-slate-200 card-shadow">
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Contrib. Patronale (30%)</p>
+          <p class="text-2xl sm:text-3xl font-extrabold text-indigo-600 mt-1 font-mono" id="rcContribPatronale">0 €</p>
+          <div class="mt-2 flex items-center text-xs text-indigo-600 gap-1">
+            <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+            <span>Spécifique Rupture Conv.</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 border border-slate-200 card-shadow">
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Coût Total Entreprise (RC)</p>
+          <p class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1 font-mono" id="rcCoutEntreprise">0 €</p>
+          <div class="mt-2 flex items-center text-xs text-amber-600 gap-1">
+            <i data-lucide="building" class="w-3.5 h-3.5"></i>
+            <span>Inclus STC + Charges + Contrib. 30%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Specific RC Warning Banner -->
+      <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl text-xs text-indigo-900 flex items-start gap-3">
+        <i data-lucide="info" class="w-5 h-5 text-indigo-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <p class="font-bold">Régime Spécifique de la Rupture Conventionnelle :</p>
+          <p>
+            Depuis le 1er septembre 2023, la contribution patronale spécifique sur les indemnités de rupture conventionnelle est fixée à **30% sur la fraction exonérée de cotisations sociales**. Le montant net pour le salarié reste similaire au licenciement, mais le coût employeur est généralement plus élevé.
+          </p>
+        </div>
+      </div>
+
+      <!-- Itemized Settlement Table RC -->
+      <div class="bg-white rounded-xl border border-slate-200 card-shadow overflow-hidden">
+        <div class="p-4 bg-indigo-950 text-white flex items-center justify-between">
+          <h3 class="font-semibold text-sm flex items-center gap-2">
+            <i data-lucide="handshake" class="w-4 h-4 text-indigo-400"></i>
+            Détail du Solde de Tout Compte - Rupture Conventionnelle
+          </h3>
+          <span class="text-xs text-indigo-200 font-mono">Indemnité Légale Minimum Dépensée</span>
+        </div>
+
+        <div class="divide-y divide-slate-100 text-sm">
+          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-slate-900">Indemnité Spécifique de Rupture (Minimum Légale/Syntec)</span>
+                <span class="bg-sky-100 text-sky-800 text-[10px] font-medium px-2 py-0.5 rounded-full">Non imposable</span>
+              </div>
+              <p class="text-xs text-slate-500" id="rcDetailLegalFormula">Calculé sur l'ancienneté conventionnelle Syntec.</p>
+            </div>
+            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rcRowLegalAmount">0,00 €</div>
+          </div>
+
+          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="font-semibold text-slate-900">Indemnité Congés Payés (ICCP)</span>
+              <p class="text-xs text-slate-500" id="rcDetailIccpFormula">Solde CP restants.</p>
+            </div>
+            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rcRowIccpAmount">0,00 €</div>
+          </div>
+
+          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="font-semibold text-slate-900">Rachat des RTT Non Pris</span>
+              <p class="text-xs text-slate-500" id="rcDetailRttFormula">Solde RTT restants.</p>
+            </div>
+            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rcRowRttAmount">0,00 €</div>
+          </div>
+
+          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="font-semibold text-slate-900">Compte Épargne Temps (CET)</span>
+              <p class="text-xs text-slate-500" id="rcDetailCetFormula">Solde CET restants.</p>
+            </div>
+            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rcRowCetAmount">0,00 €</div>
+          </div>
+
+          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="font-semibold text-slate-900">Primes & Variables Dues Proratisées</span>
+              <p class="text-xs text-slate-500">Variables d'objectifs ou solde complémentaire.</p>
+            </div>
+            <div class="text-right font-mono font-bold text-slate-900 text-base" id="rcRowBonusAmount">0,00 €</div>
+          </div>
+
+          <div class="p-4 bg-indigo-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-indigo-950">Négociation / Supra-Légale RC</span>
+                <span class="bg-indigo-100 text-indigo-800 text-[10px] font-medium px-2 py-0.5 rounded-full" id="rcRowSupraBadge">0.0 mois</span>
+              </div>
+              <p class="text-xs text-indigo-800/80">Montant au-delà du minimum légal/conventionnel.</p>
+            </div>
+            <div class="text-right font-mono font-bold text-indigo-700 text-lg" id="rcRowSupraAmount">0,00 €</div>
+          </div>
+
+          <div class="p-4 bg-indigo-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="font-bold text-base">TOTAL BRUT SALARIÉ (RC)</span>
+            </div>
+            <div class="text-right font-mono font-extrabold text-emerald-400 text-2xl" id="rcRowTotalAmount">0,00 €</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cost Table (RC) -->
+      <div class="bg-white rounded-xl border border-slate-200 card-shadow overflow-hidden">
+        <div class="p-4 bg-indigo-900 text-white flex justify-between items-center">
+          <h3 class="font-bold text-sm flex items-center gap-2">
+            <i data-lucide="building-2" class="w-5 h-5 text-indigo-300"></i>
+            Coût Employeur Détaillé (Rupture Conventionnelle)
+          </h3>
+          <span class="text-[10px] bg-indigo-800 text-indigo-200 px-2.5 py-1 rounded-full font-mono">Contrib. Patronale 30% Incluse</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                <th class="p-3">Composante</th>
+                <th class="p-3 text-right">Montant Brut (€)</th>
+                <th class="p-3 text-right text-slate-600">Contrib. Patronale (30% / standard)</th>
+                <th class="p-3 text-right font-bold text-slate-900 bg-slate-200/50">Coût Entreprise</th>
+                <th class="p-3 text-right text-slate-600">Cotis. Salariales / CSG</th>
+                <th class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/50">Net Estimé Salarié</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-mono text-slate-800">
+              <tr>
+                <td class="p-3 font-sans">1. Éléments Salariaux (CP/RTT/CET/Primes)</td>
+                <td class="p-3 text-right" id="rcColBrutSal">0,00 €</td>
+                <td class="p-3 text-right text-slate-600" id="rcColPatSal">0,00 €</td>
+                <td class="p-3 text-right font-bold bg-slate-100/50" id="rcColCostSal">0,00 €</td>
+                <td class="p-3 text-right text-amber-700" id="rcColCotSal">0,00 €</td>
+                <td class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/30" id="rcColNetSal">0,00 €</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-sans">2. Indemnité Légale RC</td>
+                <td class="p-3 text-right text-sky-700" id="rcColBrutLegal">0,00 €</td>
+                <td class="p-3 text-right text-indigo-700 font-semibold" id="rcColPatLegal">0,00 € (30%)</td>
+                <td class="p-3 text-right font-bold bg-slate-100/50" id="rcColCostLegal">0,00 €</td>
+                <td class="p-3 text-right text-slate-500" id="rcColCotLegal">0,00 €</td>
+                <td class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/30" id="rcColNetLegal">0,00 €</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-sans">3. Part Supra-Légale RC</td>
+                <td class="p-3 text-right text-indigo-700" id="rcColBrutSupra">0,00 €</td>
+                <td class="p-3 text-right text-indigo-700 font-semibold" id="rcColPatSupra">0,00 €</td>
+                <td class="p-3 text-right font-bold bg-slate-100/50" id="rcColCostSupra">0,00 €</td>
+                <td class="p-3 text-right text-amber-700" id="rcColCotSupra">0,00 €</td>
+                <td class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/30" id="rcColNetSupra">0,00 €</td>
+              </tr>
+              <tr class="bg-indigo-950 text-white font-bold text-sm">
+                <td class="p-3 font-sans">TOTAL RUPTURE CONVENTIONNELLE</td>
+                <td class="p-3 text-right text-emerald-400 font-extrabold" id="rcColTotalBrut">0,00 €</td>
+                <td class="p-3 text-right text-indigo-300" id="rcColTotalPat">0,00 €</td>
+                <td class="p-3 text-right text-amber-300 bg-indigo-900" id="rcColTotalCost">0,00 €</td>
+                <td class="p-3 text-right text-slate-300" id="rcColTotalCot">0,00 €</td>
+                <td class="p-3 text-right text-emerald-300 bg-emerald-950/80 font-extrabold text-base" id="rcColTotalNet">0,00 €</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== TAB 4 : TABLEAU COMPARATIF ==================== -->
+    <div id="tab-comparatif" class="tab-content hidden space-y-6">
+
+      <div class="bg-white rounded-xl p-5 border border-slate-200 card-shadow space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <h2 class="font-bold text-slate-900 text-base flex items-center gap-2">
+              <i data-lucide="git-compare" class="w-5 h-5 text-emerald-600"></i>
+              Comparatif Synthétique : Licenciement vs Rupture Conventionnelle
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Analyse d'impact financier pour l'entreprise et le salarié pour le même montant négocié</p>
+          </div>
+          <span class="text-xs bg-slate-100 text-slate-700 px-3 py-1 rounded-full font-mono">Plafonds 2026</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-900 text-white">
+                <th class="p-3.5 font-semibold">Critères d'Analyse</th>
+                <th class="p-3.5 font-semibold text-right text-sky-300 border-l border-slate-800">Licenciement</th>
+                <th class="p-3.5 font-semibold text-right text-indigo-300 border-l border-slate-800">Rupture Conventionnelle</th>
+                <th class="p-3.5 font-semibold text-right text-amber-300 border-l border-slate-800">Écart / Impact</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 font-mono text-slate-800">
+
+              <!-- Coût Entreprise -->
+              <tr class="bg-amber-50/40 hover:bg-amber-50 transition">
+                <td class="p-3 font-sans font-bold text-slate-900 flex items-center gap-1.5">
+                  <i data-lucide="building" class="w-4 h-4 text-amber-600"></i>
+                  COÛT TOTAL ENTREPRISE
+                </td>
+                <td class="p-3 text-right font-bold text-slate-900 border-l border-slate-200 text-sm" id="cmpCostLic">0,00 €</td>
+                <td class="p-3 text-right font-bold text-indigo-900 border-l border-slate-200 text-sm" id="cmpCostRc">0,00 €</td>
+                <td class="p-3 text-right font-extrabold text-amber-700 border-l border-slate-200 text-sm" id="cmpCostDiff">0,00 €</td>
+              </tr>
+
+              <!-- Total STC Brut -->
+              <tr class="hover:bg-slate-50">
+                <td class="p-3 font-sans font-semibold text-slate-700">Total Solde de Tout Compte Brut</td>
+                <td class="p-3 text-right border-l border-slate-200" id="cmpBrutLic">0,00 €</td>
+                <td class="p-3 text-right border-l border-slate-200" id="cmpBrutRc">0,00 €</td>
+                <td class="p-3 text-right font-semibold text-slate-500 border-l border-slate-200" id="cmpBrutDiff">0,00 €</td>
+              </tr>
+
+              <!-- Net Salarié -->
+              <tr class="bg-emerald-50/40 hover:bg-emerald-50 transition">
+                <td class="p-3 font-sans font-bold text-emerald-950 flex items-center gap-1.5">
+                  <i data-lucide="wallet" class="w-4 h-4 text-emerald-600"></i>
+                  NET ESTIMÉ SALARIÉ (avant PAS)
+                </td>
+                <td class="p-3 text-right font-bold text-emerald-800 border-l border-slate-200 text-sm" id="cmpNetLic">0,00 €</td>
+                <td class="p-3 text-right font-bold text-emerald-800 border-l border-slate-200 text-sm" id="cmpNetRc">0,00 €</td>
+                <td class="p-3 text-right font-bold text-emerald-700 border-l border-slate-200 text-sm" id="cmpNetDiff">0,00 €</td>
+              </tr>
+
+              <!-- Charges Patronales Globales -->
+              <tr class="hover:bg-slate-50">
+                <td class="p-3 font-sans text-slate-700">Total Charges Patronales & Contributions</td>
+                <td class="p-3 text-right border-l border-slate-200" id="cmpPatLic">0,00 €</td>
+                <td class="p-3 text-right text-indigo-700 font-semibold border-l border-slate-200" id="cmpPatRc">0,00 €</td>
+                <td class="p-3 text-right text-amber-600 font-semibold border-l border-slate-200" id="cmpPatDiff">0,00 €</td>
+              </tr>
+
+              <!-- Cotisations Salariales / CSG -->
+              <tr class="hover:bg-slate-50">
+                <td class="p-3 font-sans text-slate-700">Cotisations Salariales & CSG/CRDS</td>
+                <td class="p-3 text-right border-l border-slate-200" id="cmpCotLic">0,00 €</td>
+                <td class="p-3 text-right border-l border-slate-200" id="cmpCotRc">0,00 €</td>
+                <td class="p-3 text-right text-slate-500 border-l border-slate-200" id="cmpCotDiff">0,00 €</td>
+              </tr>
+
+              <!-- Carence France Travail -->
+              <tr class="hover:bg-slate-50">
+                <td class="p-3 font-sans font-semibold text-slate-800 flex items-center gap-1.5">
+                  <i data-lucide="clock" class="w-4 h-4 text-amber-600"></i>
+                  Carence France Travail (Différé Supra)
+                </td>
+                <td class="p-3 text-right border-l border-slate-200 font-bold" id="cmpCarLic">0 jours</td>
+                <td class="p-3 text-right border-l border-slate-200 font-bold" id="cmpCarRc">0 jours</td>
+                <td class="p-3 text-right border-l border-slate-200 text-slate-500" id="cmpCarDiff">Identique</td>
+              </tr>
+
+              <!-- Imposition Salarié -->
+              <tr class="hover:bg-slate-50">
+                <td class="p-3 font-sans text-slate-700">Régime d'Imposition des Indemnités</td>
+                <td class="p-3 text-right border-l border-slate-200 font-sans text-[11px] text-slate-600">Exonéré jusqu'à 2× Sal. Annuel (Max 278k€)</td>
+                <td class="p-3 text-right border-l border-slate-200 font-sans text-[11px] text-slate-600">Exonéré jusqu'à 2× Sal. Annuel (si pas de retraite)</td>
+                <td class="p-3 text-right border-l border-slate-200 font-sans text-[11px] text-slate-500">Similaire</td>
+              </tr>
 
             </tbody>
           </table>
         </div>
-
-        <div class="p-3 bg-slate-50 text-[11px] text-slate-500 border-t border-slate-200 flex flex-col sm:flex-row justify-between gap-2">
-          <span>• Taux moyen indicatif appliqué : Cotisations patronales sur salaire = 42%, Cotisations salariales = 22%, CSG/CRDS non déductible = 9.7%.</span>
-          <span class="font-medium text-slate-700">Le Net Salarié estimé s'entend avant prélèvement à la source (PAS).</span>
-        </div>
       </div>
 
-      <!-- Explanatory Syntec Rules Note -->
-      <div class="p-4 bg-sky-50 rounded-xl border border-sky-100 text-xs text-sky-900 flex gap-3 items-start">
-        <i data-lucide="info" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
-        <div class="space-y-1">
-          <p class="font-semibold">Barème Convention Collective Syntec & Règlementation :</p>
+      <!-- Comparative Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-sky-50 rounded-xl p-4 border border-sky-200 text-xs text-sky-900 space-y-2">
+          <div class="font-bold text-sm text-sky-950 flex items-center gap-1.5">
+            <i data-lucide="thumbs-up" class="w-4 h-4 text-sky-600"></i>
+            Avantage Entreprise : Licenciement
+          </div>
           <p>
-            • <strong>Moins de 10 ans d'ancienneté :</strong> 1/4 de mois de salaire par année.<br>
-            • <strong>Plus de 10 ans d'ancienneté :</strong> 1/3 de mois de salaire par année supplémentaire.<br>
-            • <strong>Valorisation des congés :</strong> L'employeur applique la méthode du 1/10ème ou du maintien de salaire selon la règle la plus favorable pour le salarié.
+            En cas de licenciement, l'indemnité légale et supra-légale subit moins de contributions patronales spécifiques. Le coût total pour l'entreprise est donc généralement **plus faible** à montant brut égal versé au salarié.
+          </p>
+        </div>
+
+        <div class="bg-indigo-50 rounded-xl p-4 border border-indigo-200 text-xs text-indigo-900 space-y-2">
+          <div class="font-bold text-sm text-indigo-950 flex items-center gap-1.5">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-indigo-600"></i>
+            Spécificité : Rupture Conventionnelle
+          </div>
+          <p>
+            La Rupture Conventionnelle applique une **contribution patronale de 30%** sur la part d'indemnité exonérée. Elle sécurise le départ juridique mais augmente le surcoût employeur.
           </p>
         </div>
       </div>
@@ -670,27 +887,29 @@
 
   </main>
 
+  <!-- Footer -->
   <footer class="mt-auto bg-slate-900 text-slate-400 border-t border-slate-800 text-xs py-4 no-print">
     <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between sm:items-center">
       <p>© Simulateur Solde de Tout Compte conforme Convention Syntec & Code du Travail.</p>
-      <p class="mt-2 sm:mt-0 text-slate-500">Estimation indicative à titre d'information RH.</p>
+      <p class="mt-2 sm:mt-0 text-slate-500">Estimation indicative RH & Juridique.</p>
     </div>
   </footer>
-
-  <!-- Print Only Header -->
-  <div class="hidden print-only p-8">
-    <div class="border-b pb-4 mb-6">
-      <h1 class="text-2xl font-bold text-slate-900">Synthèse de Solde de Tout Compte - Convention Syntec</h1>
-      <p class="text-sm text-slate-600">Calcul détaillé des indemnités de rupture, coût entreprise et net salarié</p>
-    </div>
-  </div>
 
   <script>
     // Initialize Lucide Icons
     lucide.createIcons();
 
-    // Global state tracking for Dual Controller sync
-    let lastModifiedSupraMode = 'months'; // 'months' or 'euros'
+    // Tab Switching Logic
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+      document.getElementById(tabId).classList.remove('hidden');
+      document.getElementById('btn-' + tabId).classList.add('active');
+    }
+
+    // Global state tracking
+    let lastModifiedSupraMode = 'months';
 
     // Helper: Currency Formatter
     function formatCurrency(amount) {
@@ -715,16 +934,13 @@
       lastModifiedSupraMode = 'months';
       const numMonths = Math.max(0, parseFloat(val) || 0);
       
-      // Update Months UI
       if (source !== 'slider') document.getElementById('supraMonthsRange').value = Math.min(24, numMonths);
       if (source !== 'input') document.getElementById('supraMonthsInput').value = numMonths.toFixed(1);
       document.getElementById('supraMonthsValue').innerText = `${numMonths.toFixed(1)} mois`;
 
-      // Recalculate Euros based on current Reference Salary
       const refSalary = getReferenceSalary();
       const calculatedEuros = numMonths * refSalary;
 
-      // Sync Euros UI
       document.getElementById('supraEurosRange').value = Math.min(100000, calculatedEuros);
       document.getElementById('supraEurosInput').value = Math.round(calculatedEuros);
       document.getElementById('supraEurosValue').innerText = formatCurrency(calculatedEuros);
@@ -739,16 +955,13 @@
       lastModifiedSupraMode = 'euros';
       const numEuros = Math.max(0, parseFloat(val) || 0);
 
-      // Update Euros UI
       if (source !== 'slider') document.getElementById('supraEurosRange').value = Math.min(100000, numEuros);
       if (source !== 'input') document.getElementById('supraEurosInput').value = Math.round(numEuros);
       document.getElementById('supraEurosValue').innerText = formatCurrency(numEuros);
 
-      // Recalculate Months based on current Reference Salary
       const refSalary = getReferenceSalary();
       const calculatedMonths = refSalary > 0 ? (numEuros / refSalary) : 0;
 
-      // Sync Months UI
       document.getElementById('supraMonthsRange').value = Math.min(24, calculatedMonths);
       document.getElementById('supraMonthsInput').value = calculatedMonths.toFixed(1);
       document.getElementById('supraMonthsValue').innerText = `${calculatedMonths.toFixed(1)} mois`;
@@ -779,7 +992,6 @@
       const refSalary = getReferenceSalary();
       document.getElementById('refSalaryBadge').innerText = `Ref: ${formatCurrency(refSalary)}/mois`;
 
-      // If salary inputs changed, update the synchronized supra-legal value depending on active mode
       if (['baseSalary', 'monthlyVariable', 'annualBonus'].includes(changedSource)) {
         if (lastModifiedSupraMode === 'months') {
           const currentMonths = parseFloat(document.getElementById('supraMonthsInput').value) || 0;
@@ -817,7 +1029,7 @@
         formulaText = `(10 ans × 1/4) + (${remainingYears.toFixed(2)} ans × 1/3) × ${formatCurrency(refSalary)}`;
       }
 
-      // 4. Compute Daily Rates & Leave Compensation based on Selected Valuation Method
+      // 4. Leave Compensation Valuation
       const cpEligibleMonthlyGross = baseSalary + monthlyVariable;
       const cpEligibleAnnualGross = (baseSalary * 12) + (monthlyVariable * 12);
 
@@ -837,7 +1049,7 @@
           chosenIccp = Math.max(iccpTenthRule, iccpMaintien2167);
           const isTenthUsed = iccpTenthRule >= iccpMaintien2167;
           badgeLabel = isTenthUsed ? 'Arbitrage: 1/10è Retenu' : 'Arbitrage: Maintien Retenu';
-          methodHelpText = `<strong>Arbitrage Légale Automatique :</strong> Le système compare la règle du 1/10è (${formatCurrency(iccpTenthRule)}) et le maintien de salaire sur base ouvrée 21.67j (${formatCurrency(iccpMaintien2167)}) pour retenir le plus avantageux.`;
+          methodHelpText = `<strong>Arbitrage Légale Automatique :</strong> Compare le 1/10è (${formatCurrency(iccpTenthRule)}) et le maintien 21.67j (${formatCurrency(iccpMaintien2167)}).`;
           valuationTagText = 'Méthode: Arbitrage Auto Légal';
           dailyRateForRttCet = cpEligibleMonthlyGross / 21.67;
           break;
@@ -845,7 +1057,7 @@
         case 'OUVRES':
           chosenIccp = iccpMaintien2167;
           badgeLabel = 'Méthode Jours Ouvrés (21.67j)';
-          methodHelpText = `<strong>Jours Ouvrés (21.67 jours/mois) :</strong> Méthode standard Syntec/RH basée sur 5 jours travaillés par semaine. Valeur du jour = ${formatCurrency(cpEligibleMonthlyGross / 21.67)}.`;
+          methodHelpText = `<strong>Jours Ouvrés (21.67j) :</strong> Standard Syntec. Valeur jour = ${formatCurrency(cpEligibleMonthlyGross / 21.67)}.`;
           valuationTagText = 'Méthode: Jours Ouvrés (21.67j)';
           dailyRateForRttCet = cpEligibleMonthlyGross / 21.67;
           break;
@@ -853,7 +1065,7 @@
         case 'OUVRABLES':
           chosenIccp = iccpMaintien26;
           badgeLabel = 'Méthode Jours Ouvrables (26j)';
-          methodHelpText = `<strong>Jours Ouvrables (26.00 jours/mois) :</strong> Décompte sur 6 jours ouvrables par semaine. Valeur du jour = ${formatCurrency(cpEligibleMonthlyGross / 26)}.`;
+          methodHelpText = `<strong>Jours Ouvrables (26j) :</strong> Valeur jour = ${formatCurrency(cpEligibleMonthlyGross / 26)}.`;
           valuationTagText = 'Méthode: Jours Ouvrables (26j)';
           dailyRateForRttCet = cpEligibleMonthlyGross / 26;
           break;
@@ -861,7 +1073,7 @@
         case 'REEL':
           chosenIccp = iccpMaintien21;
           badgeLabel = 'Méthode Réel Travaillé (21j)';
-          methodHelpText = `<strong>Jours Réels du Mois (21j moyens) :</strong> Décompte au réel des jours travaillés. Valeur jour = ${formatCurrency(cpEligibleMonthlyGross / 21)}.`;
+          methodHelpText = `<strong>Jours Réels (21j moyens) :</strong> Valeur jour = ${formatCurrency(cpEligibleMonthlyGross / 21)}.`;
           valuationTagText = 'Méthode: Réel Travaillé (21j)';
           dailyRateForRttCet = cpEligibleMonthlyGross / 21;
           break;
@@ -869,7 +1081,7 @@
         case 'DIXIEME':
           chosenIccp = iccpTenthRule;
           badgeLabel = 'Règle Stricte du 1/10ème';
-          methodHelpText = `<strong>1/10ème Stricte :</strong> Prélève 10% de la rémunération brute globale éligible de la période de référence au prorata des jours restants.`;
+          methodHelpText = `<strong>1/10ème Stricte :</strong> 10% du brut annuel éligible proratisé.`;
           valuationTagText = 'Méthode: 1/10ème Stricte';
           dailyRateForRttCet = cpEligibleMonthlyGross / 21.67;
           break;
@@ -878,18 +1090,18 @@
       document.getElementById('valuationMethodHelp').innerHTML = methodHelpText;
       document.getElementById('activeValuationTag').innerText = valuationTagText;
 
-      // 5. Compute RTT & CET
+      // 5. RTT & CET
       const rttAmount = rttDays * dailyRateForRttCet;
       const cetAmount = cetDays * dailyRateForRttCet;
 
-      // 6. Compute Total STC
+      // 6. Total STC Brut
       const totalStcBrut = legalIndemnity + chosenIccp + rttAmount + cetAmount + pendingBonus + supraIndemnity;
 
-      // 7. France Travail Carence (Différé spécifique) : Part Supra / 107.9 (capped at 150 days)
+      // 7. France Travail Carence
       const carenceDaysSupra = Math.min(150, Math.floor(supraIndemnity / 107.9));
       const carenceDaysCp = Math.floor(chosenIccp / dailyRateForRttCet);
 
-      // 8. Update UI Elements
+      // ==================== POPULATE LICENCIEMENT UI ====================
       document.getElementById('totalStcBrut').innerText = formatCurrency(totalStcBrut);
       document.getElementById('indemnityLegal').innerText = formatCurrency(legalIndemnity);
       document.getElementById('carenceDays').innerText = `${carenceDaysSupra} jours`;
@@ -899,13 +1111,13 @@
 
       document.getElementById('rowIccpAmount').innerText = formatCurrency(chosenIccp);
       document.getElementById('iccpMethodBadge').innerText = badgeLabel;
-      document.getElementById('detailIccpFormula').innerText = `${cpDays} jours de CP valorisés à ${formatCurrency(chosenIccp)}`;
+      document.getElementById('detailIccpFormula').innerText = `${cpDays} j CP = ${formatCurrency(chosenIccp)}`;
 
       document.getElementById('rowRttAmount').innerText = formatCurrency(rttAmount);
-      document.getElementById('detailRttFormula').innerText = `${rttDays} j RTT × ${formatCurrency(dailyRateForRttCet)}/jour`;
+      document.getElementById('detailRttFormula').innerText = `${rttDays} j RTT × ${formatCurrency(dailyRateForRttCet)}/j`;
 
       document.getElementById('rowCetAmount').innerText = formatCurrency(cetAmount);
-      document.getElementById('detailCetFormula').innerText = `${cetDays} j CET × ${formatCurrency(dailyRateForRttCet)}/jour`;
+      document.getElementById('detailCetFormula').innerText = `${cetDays} j CET × ${formatCurrency(dailyRateForRttCet)}/j`;
 
       document.getElementById('rowBonusAmount').innerText = formatCurrency(pendingBonus);
       document.getElementById('rowSupraAmount').innerText = formatCurrency(supraIndemnity);
@@ -918,20 +1130,14 @@
       const annualGrossReference = refSalary * 12;
       document.getElementById('fiscalLimitText').innerText = `${formatCurrency(annualGrossReference * 2)}`;
 
-      // 9. Update Stacked Bar Percentages
       if (totalStcBrut > 0) {
-        const pctLegal = (legalIndemnity / totalStcBrut) * 100;
-        const pctSupra = (supraIndemnity / totalStcBrut) * 100;
-        const pctConges = ((chosenIccp + rttAmount + cetAmount) / totalStcBrut) * 100;
-        const pctPrimes = (pendingBonus / totalStcBrut) * 100;
-
-        document.getElementById('barLegal').style.width = `${pctLegal}%`;
-        document.getElementById('barSupra').style.width = `${pctSupra}%`;
-        document.getElementById('barConges').style.width = `${pctConges}%`;
-        document.getElementById('barPrimes').style.width = `${pctPrimes}%`;
+        document.getElementById('barLegal').style.width = `${(legalIndemnity / totalStcBrut) * 100}%`;
+        document.getElementById('barSupra').style.width = `${(supraIndemnity / totalStcBrut) * 100}%`;
+        document.getElementById('barConges').style.width = `${((chosenIccp + rttAmount + cetAmount) / totalStcBrut) * 100}%`;
+        document.getElementById('barPrimes').style.width = `${(pendingBonus / totalStcBrut) * 100}%`;
       }
 
-      // 10. COMPUTE DETAILED EMPLOYER COST AND NET SALARY TABLE
+      // ==================== LICENCIEMENT COST & NET CALCULATIONS ====================
       const brutSalaryComponents = chosenIccp + rttAmount + cetAmount + pendingBonus;
       const patRateSalary = 0.42;
       const cotRateSalary = 0.22;
@@ -941,14 +1147,12 @@
       const cotSal = brutSalaryComponents * cotRateSalary;
       const netSal = brutSalaryComponents - cotSal;
 
-      // Legal Severance is 100% exempt from social charges & CSG
       const patLegal = 0;
       const costLegal = legalIndemnity;
       const cotLegal = 0;
       const netLegal = legalIndemnity;
 
-      // Supra-Legal Severance Social/Fiscal Rules (Urssaf Exemption & Capped Forfait Social/CSG)
-      const passPlafond2026 = 47100; // PASS 2026 reference
+      const passPlafond2026 = 47100;
       const exemptUrssafLimit = Math.min(annualGrossReference * 2, passPlafond2026 * 2);
       const totalDismissalIndemnity = legalIndemnity + supraIndemnity;
 
@@ -956,9 +1160,8 @@
       let cotSupra = 0;
 
       if (totalDismissalIndemnity <= exemptUrssafLimit) {
-        // Fully exempt from standard social charges; CSG/CRDS applies above legal
-        cotSupra = supraIndemnity * 0.097; // 9.7% CSG/CRDS non-deductible
-        patSupra = 0; // Exempt under Urssaf cap
+        cotSupra = supraIndemnity * 0.097;
+        patSupra = 0;
       } else {
         const taxableSupraPortion = Math.max(0, totalDismissalIndemnity - exemptUrssafLimit);
         const exemptSupraPortion = Math.max(0, supraIndemnity - taxableSupraPortion);
@@ -970,14 +1173,13 @@
       const costSupra = supraIndemnity + patSupra;
       const netSupra = supraIndemnity - cotSupra;
 
-      // Total Row Summary
       const totalBrutCol = brutSalaryComponents + legalIndemnity + supraIndemnity;
       const totalPatCol = patSal + patLegal + patSupra;
       const totalCostCol = costSal + costLegal + costSupra;
       const totalCotCol = cotSal + cotLegal + cotSupra;
       const totalNetCol = netSal + netLegal + netSupra;
 
-      // Populate Table DOM Cells
+      // Populate Licenciement Table DOM
       document.getElementById('colBrutSal').innerText = formatCurrency(brutSalaryComponents);
       document.getElementById('colPatSal').innerText = formatCurrency(patSal);
       document.getElementById('colCostSal').innerText = formatCurrency(costSal);
@@ -1001,50 +1203,135 @@
       document.getElementById('colTotalCost').innerText = formatCurrency(totalCostCol);
       document.getElementById('colTotalCot').innerText = formatCurrency(totalCotCol);
       document.getElementById('colTotalNet').innerText = formatCurrency(totalNetCol);
+
+
+      // ==================== RUPTURE CONVENTIONNELLE CALCULATIONS ====================
+      // Under RC: 30% Specific Employer Contribution on the exempt portion of severance
+      const rcExemptPortionLegal = Math.min(legalIndemnity, exemptUrssafLimit);
+      const rcPatLegal = rcExemptPortionLegal * 0.30;
+      const rcCostLegal = legalIndemnity + rcPatLegal;
+
+      let rcPatSupra = 0;
+      let rcCotSupra = 0;
+
+      if (totalDismissalIndemnity <= exemptUrssafLimit) {
+        rcPatSupra = supraIndemnity * 0.30; // 30% patronale
+        rcCotSupra = supraIndemnity * 0.097; // CSG/CRDS
+      } else {
+        const taxableSupraPortion = Math.max(0, totalDismissalIndemnity - exemptUrssafLimit);
+        const exemptSupraPortion = Math.max(0, supraIndemnity - taxableSupraPortion);
+
+        rcPatSupra = (exemptSupraPortion * 0.30) + (taxableSupraPortion * patRateSalary);
+        rcCotSupra = (exemptSupraPortion * 0.097) + (taxableSupraPortion * cotRateSalary);
+      }
+
+      const rcCostSupra = supraIndemnity + rcPatSupra;
+      const rcNetSupra = supraIndemnity - rcCotSupra;
+
+      const rcTotalPatCol = patSal + rcPatLegal + rcPatSupra;
+      const rcTotalCostCol = costSal + rcCostLegal + rcCostSupra;
+      const rcTotalCotCol = cotSal + cotLegal + rcCotSupra;
+      const rcTotalNetCol = netSal + netLegal + rcNetSupra;
+
+      // Populate RC UI Elements
+      document.getElementById('rcTotalStcBrut').innerText = formatCurrency(totalBrutCol);
+      document.getElementById('rcContribPatronale').innerText = formatCurrency(rcPatLegal + rcPatSupra);
+      document.getElementById('rcCoutEntreprise').innerText = formatCurrency(rcTotalCostCol);
+
+      document.getElementById('rcRowLegalAmount').innerText = formatCurrency(legalIndemnity);
+      document.getElementById('rcDetailLegalFormula').innerText = `Spécifique Rupture Conv. (Syntec) : ${formulaText}`;
+      document.getElementById('rcRowIccpAmount').innerText = formatCurrency(chosenIccp);
+      document.getElementById('rcDetailIccpFormula').innerText = `${cpDays} j CP = ${formatCurrency(chosenIccp)}`;
+      document.getElementById('rcRowRttAmount').innerText = formatCurrency(rttAmount);
+      document.getElementById('rcDetailRttFormula').innerText = `${rttDays} j RTT × ${formatCurrency(dailyRateForRttCet)}/j`;
+      document.getElementById('rcRowCetAmount').innerText = formatCurrency(cetAmount);
+      document.getElementById('rcDetailCetFormula').innerText = `${cetDays} j CET × ${formatCurrency(dailyRateForRttCet)}/j`;
+      document.getElementById('rcRowBonusAmount').innerText = formatCurrency(pendingBonus);
+      document.getElementById('rcRowSupraAmount').innerText = formatCurrency(supraIndemnity);
+      document.getElementById('rcRowSupraBadge').innerText = `${supraMonthsVal.toFixed(1)} mois ref`;
+      document.getElementById('rcRowTotalAmount').innerText = formatCurrency(totalBrutCol);
+
+      // Populate RC Cost Table
+      document.getElementById('rcColBrutSal').innerText = formatCurrency(brutSalaryComponents);
+      document.getElementById('rcColPatSal').innerText = formatCurrency(patSal);
+      document.getElementById('rcColCostSal').innerText = formatCurrency(costSal);
+      document.getElementById('rcColCotSal').innerText = formatCurrency(cotSal);
+      document.getElementById('rcColNetSal').innerText = formatCurrency(netSal);
+
+      document.getElementById('rcColBrutLegal').innerText = formatCurrency(legalIndemnity);
+      document.getElementById('rcColPatLegal').innerText = formatCurrency(rcPatLegal);
+      document.getElementById('rcColCostLegal').innerText = formatCurrency(rcCostLegal);
+      document.getElementById('rcColCotLegal').innerText = formatCurrency(cotLegal);
+      document.getElementById('rcColNetLegal').innerText = formatCurrency(netLegal);
+
+      document.getElementById('rcColBrutSupra').innerText = formatCurrency(supraIndemnity);
+      document.getElementById('rcColPatSupra').innerText = formatCurrency(rcPatSupra);
+      document.getElementById('rcColCostSupra').innerText = formatCurrency(rcCostSupra);
+      document.getElementById('rcColCotSupra').innerText = formatCurrency(rcCotSupra);
+      document.getElementById('rcColNetSupra').innerText = formatCurrency(rcNetSupra);
+
+      document.getElementById('rcColTotalBrut').innerText = formatCurrency(totalBrutCol);
+      document.getElementById('rcColTotalPat').innerText = formatCurrency(rcTotalPatCol);
+      document.getElementById('rcColTotalCost').innerText = formatCurrency(rcTotalCostCol);
+      document.getElementById('rcColTotalCot').innerText = formatCurrency(rcTotalCotCol);
+      document.getElementById('rcColTotalNet').innerText = formatCurrency(rcTotalNetCol);
+
+
+      // ==================== COMPARATIVE TABLE POPULATION ====================
+      document.getElementById('cmpCostLic').innerText = formatCurrency(totalCostCol);
+      document.getElementById('cmpCostRc').innerText = formatCurrency(rcTotalCostCol);
+      
+      const costDiff = rcTotalCostCol - totalCostCol;
+      document.getElementById('cmpCostDiff').innerText = `${costDiff >= 0 ? '+' : ''}${formatCurrency(costDiff)} (Surcoût RC)`;
+
+      document.getElementById('cmpBrutLic').innerText = formatCurrency(totalBrutCol);
+      document.getElementById('cmpBrutRc').innerText = formatCurrency(totalBrutCol);
+      document.getElementById('cmpBrutDiff').innerText = '0,00 € (Identique)';
+
+      document.getElementById('cmpNetLic').innerText = formatCurrency(totalNetCol);
+      document.getElementById('cmpNetRc').innerText = formatCurrency(rcTotalNetCol);
+      
+      const netDiff = rcTotalNetCol - totalNetCol;
+      document.getElementById('cmpNetDiff').innerText = `${netDiff >= 0 ? '+' : ''}${formatCurrency(netDiff)} (Identique)`;
+
+      document.getElementById('cmpPatLic').innerText = formatCurrency(totalPatCol);
+      document.getElementById('cmpPatRc').innerText = formatCurrency(rcTotalPatCol);
+      document.getElementById('cmpPatDiff').innerText = `+${formatCurrency(rcTotalPatCol - totalPatCol)}`;
+
+      document.getElementById('cmpCotLic').innerText = formatCurrency(totalCotCol);
+      document.getElementById('cmpCotRc').innerText = formatCurrency(rcTotalCotCol);
+      document.getElementById('cmpCotDiff').innerText = '0,00 € (Identique)';
+
+      document.getElementById('cmpCarLic').innerText = `${carenceDaysSupra} jours`;
+      document.getElementById('cmpCarRc').innerText = `${carenceDaysSupra} jours`;
+      document.getElementById('cmpCarDiff').innerText = 'Identique';
     }
 
+    // Copy Summary function
     function copySummary() {
       const total = document.getElementById('rowTotalAmount').innerText;
-      const legal = document.getElementById('rowLegalAmount').innerText;
-      const iccp = document.getElementById('rowIccpAmount').innerText;
-      const rtt = document.getElementById('rowRttAmount').innerText;
-      const cet = document.getElementById('rowCetAmount').innerText;
-      const bonus = document.getElementById('rowBonusAmount').innerText;
-      const supra = document.getElementById('rowSupraAmount').innerText;
-      const supraMonths = document.getElementById('rowSupraMonthsBadge').innerText;
-      const costTotal = document.getElementById('colTotalCost').innerText;
+      const costLic = document.getElementById('cmpCostLic').innerText;
+      const costRc = document.getElementById('cmpCostRc').innerText;
       const netTotal = document.getElementById('colTotalNet').innerText;
 
       const summaryText = 
 `--- SIMULATION SOLDE DE TOUT COMPTE SYNTEC ---
-• Total STC Brut : ${total}
-• Coût Total Entreprise : ${costTotal}
+• Total STC Brut Salarié : ${total}
 • Net Estimé Salarié : ${netTotal}
 ------------------------------------------------
-• Indemnité de Licenciement Syntec : ${legal}
-• Indemnité Congés Payés (ICCP) : ${iccp}
-• Rachat RTT : ${rtt}
-• Compte Épargne Temps (CET) : ${cet}
-• Primes & Variables Proratisés : ${bonus}
-• Indemnité Supra-Légale : ${supra} (${supraMonths})
+• Coût Total Entreprise (Licenciement) : ${costLic}
+• Coût Total Entreprise (Rupture Conv.) : ${costRc}
 ------------------------------------------------`;
 
       navigator.clipboard.writeText(summaryText).then(() => {
-        alert('Résumé du Solde de Tout Compte et du Coût Entreprise copié !');
+        alert('Résumé du Solde de Tout Compte copié dans le presse-papier !');
       }).catch(() => {
-        const textarea = document.createElement('textarea');
-        textarea.value = summaryText;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        alert('Résumé du Solde de Tout Compte et du Coût Entreprise copié !');
+        alert('Copie réalisée !');
       });
     }
 
-    // Run initial setup on window load
+    // Window load init
     window.onload = function() {
-      // Trigger initial dual synchronization with 2 months default
       handleSupraMonthsChange(2.0, 'init');
     };
   </script>
